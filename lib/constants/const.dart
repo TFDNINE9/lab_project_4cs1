@@ -1,3 +1,3 @@
-const String apiHost = 'your-http-api';
+const String apiHost = 'your-http-api.com';
 
-const int apiPort = 9999;
+const int apiPort = 1111;
