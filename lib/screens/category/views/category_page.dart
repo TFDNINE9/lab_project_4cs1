@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:lab_project_4cs1/components/custom_card.dart';
 import 'package:lab_project_4cs1/components/custom_scaffold.dart';
+import 'package:lab_project_4cs1/screens/category/views/category_edit_dialog.dart';
 
 class CategoryPage extends StatelessWidget {
   static String id = "/category";
@@ -9,9 +10,17 @@ class CategoryPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Future<void> openDialog(BuildContext context, String accountId) =>
+        showDialog(
+          context: context,
+          builder: (context) {
+            return CategoryEditDialog();
+          },
+        );
+
     return CustomScaffold(
       title: "Category Management",
-      onTapFloatingButton: () {},
+      onTapFloatingButton: () => openDialog(context, ""),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -72,6 +81,7 @@ class CategoryPage extends StatelessWidget {
                     child: CustomCard(
                       width: 400,
                       height: 95,
+                      onPressed: () => openDialog(context, "text-id-cat"),
                     ),
                   );
                 },
