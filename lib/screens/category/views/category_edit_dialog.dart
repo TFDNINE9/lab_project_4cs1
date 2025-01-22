@@ -3,7 +3,8 @@ import 'package:lab_project_4cs1/components/custom_button.dart';
 import 'package:lab_project_4cs1/components/custom_input.dart';
 
 class CategoryEditDialog extends StatelessWidget {
-  const CategoryEditDialog({super.key});
+  final int catId;
+  const CategoryEditDialog({super.key, required this.catId});
 
   @override
   Widget build(BuildContext context) {
