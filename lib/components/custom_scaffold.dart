@@ -34,8 +34,8 @@ class CustomScaffold extends StatelessWidget {
         centerTitle: true,
         title: Text(
           title,
-          style:
-              const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          style: const TextStyle(
+              color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
         ),
         backgroundColor: Colors.blue,
         leading: Builder(
@@ -50,7 +50,7 @@ class CustomScaffold extends StatelessWidget {
         actions: [
           IconButton(
             onPressed: () {
-              // Get.toNamed(ProfilePage.id);
+              // later imp
             },
             icon: const Icon(Icons.account_circle),
             color: Colors.white,

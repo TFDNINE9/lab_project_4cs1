@@ -21,99 +21,167 @@ class CategoryPage extends StatelessWidget {
           },
         );
 
-    final Catcontroller = Get.put(CategoryListController());
+    final catcontroller = Get.put(CategoryListController());
 
     return CustomScaffold(
       title: "Category Management",
       onTapFloatingButton: () => openDialog(context, 0),
-      body: Center(
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            // ignore: deprecated_member_use
+            colors: [Colors.blue.withOpacity(0.1), Colors.white],
+          ),
+        ),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Column(
             children: [
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
+              Container(
+                margin: const EdgeInsets.symmetric(vertical: 20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(15),
+                  boxShadow: [
+                    BoxShadow(
+                      // ignore: deprecated_member_use
+                      color: Colors.grey.withOpacity(0.2),
+                      spreadRadius: 2,
+                      blurRadius: 5,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+                ),
                 child: TextFormField(
                   decoration: InputDecoration(
-                    prefixIcon: Icon(Icons.search),
+                    prefixIcon: const Icon(Icons.search, color: Colors.blue),
                     suffixIcon: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         IconButton(
-                          icon: Icon(Icons.mic),
+                          icon: const Icon(Icons.mic, color: Colors.blue),
                           onPressed: () {},
                         ),
                         IconButton(
-                          icon: Icon(Icons.clear),
+                          icon: const Icon(Icons.clear, color: Colors.grey),
                           onPressed: () {},
                         ),
                       ],
                     ),
-                    hintText: "Search...",
+                    hintText: "Search categories...",
+                    hintStyle: TextStyle(color: Colors.grey[400]),
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(15),
+                      borderSide: BorderSide.none,
                     ),
+                    filled: true,
+                    fillColor: Colors.white,
                   ),
                 ),
               ),
-              SizedBox(
-                height: 5,
-              ),
-              Divider(
-                height: 5,
-              ),
-              SizedBox(
-                height: 5,
-              ),
               Expanded(
-                  child: RefreshIndicator(
-                onRefresh: () async => Catcontroller.fetchCat(),
-                child: Obx(() {
-                  if (Catcontroller.isLoading.value) {
-                    return Center(
-                      child: CircularProgressIndicator(
-                        color: Colors.blue,
-                      ),
-                    );
-                  }
+                child: RefreshIndicator(
+                  onRefresh: () async => catcontroller.fetchCat(),
+                  child: Obx(() {
+                    if (catcontroller.isLoading.value) {
+                      return const Center(
+                        child: CircularProgressIndicator(
+                          color: Colors.blue,
+                        ),
+                      );
+                    }
 
-                  if (Catcontroller.categories.isEmpty) {
-                    return Center(
-                      child: Text("No Category avilable"),
-                    );
-                  }
-
-                  return ListView.builder(
-                    itemCount: Catcontroller.categories.length,
-                    itemBuilder: (context, index) {
-                      final category = Catcontroller.categories[index];
-                      return Slidable(
-                        key: ValueKey(category.categoryId),
-                        endActionPane: ActionPane(
-                          motion: const DrawerMotion(),
+                    if (catcontroller.categories.isEmpty) {
+                      return Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            SlidableAction(
-                              onPressed: (context) {},
-                              backgroundColor: Colors.red,
-                              foregroundColor: Colors.white,
-                              icon: Icons.delete,
-                              label: 'Delete',
+                            Icon(Icons.category_outlined,
+                                size: 64, color: Colors.grey[400]),
+                            const SizedBox(height: 16),
+                            Text(
+                              "No Categories Available",
+                              style: TextStyle(
+                                color: Colors.grey[600],
+                                fontSize: 18,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              "Tap the + button to add a new category",
+                              style: TextStyle(
+                                color: Colors.grey[400],
+                                fontSize: 14,
+                              ),
                             ),
                           ],
                         ),
-                        child: CustomCard(
-                          width: 400,
-                          height: 95,
-                          textBoldtitle: category.categoryName,
-                          onPressed: () =>
-                              openDialog(context, category.categoryId),
-                        ),
                       );
-                    },
-                  );
-                }),
-              ))
+                    }
+
+                    return ListView.builder(
+                      padding: const EdgeInsets.only(bottom: 100),
+                      itemCount: catcontroller.categories.length,
+                      itemBuilder: (context, index) {
+                        final category = catcontroller.categories[index];
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8.0),
+                          child: Slidable(
+                            key: ValueKey(category.categoryId),
+                            endActionPane: ActionPane(
+                              motion: const DrawerMotion(),
+                              extentRatio: 0.25,
+                              children: [
+                                CustomSlidableAction(
+                                  padding: EdgeInsets.zero,
+                                  onPressed: (context) {
+                                    catcontroller
+                                        .deleteCat(category.categoryId);
+                                  },
+                                  backgroundColor: Colors.transparent,
+                                  foregroundColor: Colors.red,
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      const Icon(
+                                        Icons.delete_outline,
+                                        color: Colors.red,
+                                        size: 24,
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        'Delete',
+                                        style: TextStyle(
+                                          color: Colors.red.shade400,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                            child: CustomCard(
+                              width: double.infinity,
+                              height: 100,
+                              textBoldtitle: category.categoryName,
+                              textDetailtitle:
+                                  "Created at: ${category.createdAt.toString().split(' ')[0]}",
+                              textDetailColor: Colors.grey[600]!,
+                              onPressed: () =>
+                                  openDialog(context, category.categoryId),
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  }),
+                ),
+              ),
             ],
           ),
         ),

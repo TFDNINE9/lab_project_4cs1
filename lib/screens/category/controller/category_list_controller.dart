@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:lab_project_4cs1/models/category/category_model.dart';
+import 'package:lab_project_4cs1/models/category_model.dart';
 import 'package:lab_project_4cs1/services/network_service.dart';
 
 class CategoryListController extends GetxController {
@@ -30,6 +30,23 @@ class CategoryListController extends GetxController {
       }
     } catch (e) {
       debugPrint("Unexception caught: $e");
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> deleteCat(int catId) async {
+    try {
+      isLoading.value = true;
+      var res = await nw.delete('api/categories/$catId');
+      if (res.isSuccess) {
+        debugPrint("success");
+        isLoading.value = false;
+        fetchCat();
+      } else {
+        debugPrint("Error delete cat ${res.code}");
+      }
+    } catch (e) {
+      debugPrint("exception caught: $e");
       isLoading.value = false;
     }
   }
