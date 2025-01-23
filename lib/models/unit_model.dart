@@ -1,3 +1,11 @@
+import 'dart:convert';
+
+List<Unit> unitFromJson(String str) =>
+    List<Unit>.from(json.decode(str).map((x) => Unit.fromMap(x)));
+
+String unitToJson(List<Unit> data) =>
+    json.encode(List<dynamic>.from(data.map((x) => x.toMap())));
+
 class Unit {
   final int unitId;
   final String unitName;

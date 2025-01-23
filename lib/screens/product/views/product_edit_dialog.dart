@@ -7,6 +7,7 @@ import 'package:lab_project_4cs1/components/custom_input.dart';
 import 'package:lab_project_4cs1/screens/product/controller/product_controller.dart';
 import 'package:lab_project_4cs1/screens/product/controller/product_list_controller.dart';
 import 'package:lab_project_4cs1/screens/category/controller/category_list_controller.dart';
+import 'package:lab_project_4cs1/screens/unit/controller/unit_list_controller.dart';
 
 class ProductEditDialog extends StatelessWidget {
   final int productId;
@@ -25,6 +26,7 @@ class ProductEditDialog extends StatelessWidget {
 
     var productList = Get.put(ProductListController());
     var categoryList = Get.put(CategoryListController());
+    var unitList = Get.put(UnitListController());
 
     var controller = Get.put(
       ProductController(
@@ -160,17 +162,13 @@ class ProductEditDialog extends StatelessWidget {
                                     value: controller.selectedUnitId.value == 0
                                         ? null
                                         : controller.selectedUnitId.value,
-                                    hint: const Text('Select Unit'),
-                                    items: const [
-                                      DropdownMenuItem(
-                                        value: 1,
-                                        child: Text('Piece'),
-                                      ),
-                                      DropdownMenuItem(
-                                        value: 2,
-                                        child: Text('Box'),
-                                      ),
-                                    ],
+                                    hint: const Text('Select unit'),
+                                    items: unitList.units
+                                        .map((unit) => DropdownMenuItem(
+                                              value: unit.unitId,
+                                              child: Text(unit.unitName),
+                                            ))
+                                        .toList(),
                                     onChanged: (value) {
                                       if (value != null) {
                                         controller.selectedUnitId.value = value;

@@ -20,7 +20,6 @@ class ProductPage extends StatelessWidget {
         );
 
     final productController = Get.put(ProductListController());
-
     return CustomScaffold(
       title: "Product Management",
       onTapFloatingButton: () => openDialog(context, 0),

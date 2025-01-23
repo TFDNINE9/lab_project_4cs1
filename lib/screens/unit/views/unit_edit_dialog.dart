@@ -1,27 +1,27 @@
-// ignore_for_file: deprecated_member_use
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:lab_project_4cs1/components/custom_button.dart';
 import 'package:lab_project_4cs1/components/custom_input.dart';
-import 'package:lab_project_4cs1/screens/category/controller/category_controller.dart';
-import 'package:lab_project_4cs1/screens/category/controller/category_list_controller.dart';
+import 'package:lab_project_4cs1/models/dtos/unit_dto.dart';
+import 'package:lab_project_4cs1/screens/unit/controller/unit_controller.dart';
+import 'package:lab_project_4cs1/screens/unit/controller/unit_list_controller.dart';
 
-class CategoryEditDialog extends StatelessWidget {
-  final int catId;
+class UnitEditDialog extends StatelessWidget {
+  final int unitId;
   final TextEditingController nameController = TextEditingController();
-  CategoryEditDialog({super.key, required this.catId});
+
+  UnitEditDialog({super.key, required this.unitId});
 
   @override
   Widget build(BuildContext context) {
-    if (Get.isRegistered<CategoryController>()) {
-      Get.delete<CategoryController>();
+    if (Get.isRegistered<UnitController>()) {
+      Get.delete<UnitController>();
     }
-    var cList = Get.put(CategoryListController());
+    var unitList = Get.put(UnitListController());
 
-    var c = Get.put(
-      CategoryController(
-        id: catId,
+    var controller = Get.put(
+      UnitController(
+        id: unitId,
         nameController: nameController,
       ),
     );
@@ -49,9 +49,9 @@ class CategoryEditDialog extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
           child: Obx(() {
-            if (c.isLoading.value) {
+            if (controller.isLoading.value) {
               return const SizedBox(
-                height: 200, // Fixed height for loading state
+                height: 200,
                 child: Center(
                   child: CircularProgressIndicator(
                     color: Colors.blue,
@@ -67,7 +67,7 @@ class CategoryEditDialog extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      catId == 0 ? 'Add Category' : 'Edit Category',
+                      unitId == 0 ? 'Add Unit' : 'Edit Unit',
                       style: const TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
@@ -93,8 +93,8 @@ class CategoryEditDialog extends StatelessWidget {
                 ),
                 const SizedBox(height: 24),
                 CustomInput(
-                  labelText: 'Category Name',
-                  hintText: 'Enter category name',
+                  labelText: 'Unit Name',
+                  hintText: 'Enter unit name',
                   controller: nameController,
                   borderRadius: 15,
                   borderColor: Colors.blue.withOpacity(0.3),
@@ -108,7 +108,7 @@ class CategoryEditDialog extends StatelessWidget {
                 ),
                 const SizedBox(height: 24),
                 CustomButton(
-                  titleButton: catId == 0 ? 'Add Category' : 'Update Category',
+                  titleButton: unitId == 0 ? 'Add Unit' : 'Update Unit',
                   colorButton: Colors.blue,
                   height: 50,
                   borderRadius: 15,
@@ -119,11 +119,13 @@ class CategoryEditDialog extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
                   onTap: () async {
-                    c.dto.value.categoryName = nameController.text;
-                    bool success =
-                        catId == 0 ? await c.addCat() : await c.updateCat();
+                    controller.dto.value =
+                        UnitDto(unitName: nameController.text);
+                    bool success = unitId == 0
+                        ? await controller.addUnit()
+                        : await controller.updateUnit();
                     if (!success) return;
-                    await cList.fetchCat();
+                    await unitList.fetchUnits();
                   },
                 ),
               ],
