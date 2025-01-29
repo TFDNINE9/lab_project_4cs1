@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:get/get.dart';
 import 'package:lab_project_4cs1/components/custom_scaffold.dart';
+import 'package:lab_project_4cs1/components/searchbar/custom_search_field.dart';
 import 'package:lab_project_4cs1/screens/product/components/product_card.dart';
 import 'package:lab_project_4cs1/screens/product/controller/product_list_controller.dart';
 import 'package:lab_project_4cs1/screens/product/views/product_edit_dialog.dart';
@@ -19,7 +20,8 @@ class ProductPage extends StatelessWidget {
           builder: (context) => ProductEditDialog(productId: productId),
         );
 
-    final productController = Get.put(ProductListController());
+    final controller = Get.put(ProductListController());
+
     return CustomScaffold(
       title: "Product Management",
       onTapFloatingButton: () => openDialog(context, 0),
@@ -35,52 +37,16 @@ class ProductPage extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Column(
             children: [
-              Container(
-                margin: const EdgeInsets.symmetric(vertical: 20),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(15),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.2),
-                      spreadRadius: 2,
-                      blurRadius: 5,
-                      offset: const Offset(0, 3),
-                    ),
-                  ],
-                ),
-                child: TextFormField(
-                  decoration: InputDecoration(
-                    prefixIcon: const Icon(Icons.search, color: Colors.blue),
-                    suffixIcon: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.mic, color: Colors.blue),
-                          onPressed: () {},
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.clear, color: Colors.grey),
-                          onPressed: () {},
-                        ),
-                      ],
-                    ),
-                    hintText: "Search products...",
-                    hintStyle: TextStyle(color: Colors.grey[400]),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(15),
-                      borderSide: BorderSide.none,
-                    ),
-                    filled: true,
-                    fillColor: Colors.white,
-                  ),
-                ),
+              CustomSearchField(
+                controller: controller.searchController,
+                hintText: "Search products...",
+                onClear: controller.clearSearch,
               ),
               Expanded(
                 child: RefreshIndicator(
-                  onRefresh: () => productController.fetchProducts(),
+                  onRefresh: () => controller.fetchProducts(),
                   child: Obx(() {
-                    if (productController.isLoading.value) {
+                    if (controller.isLoading.value) {
                       return const Center(
                         child: CircularProgressIndicator(
                           color: Colors.blue,
@@ -88,7 +54,30 @@ class ProductPage extends StatelessWidget {
                       );
                     }
 
-                    if (productController.products.isEmpty) {
+                    final displayedItems = controller.filteredItems;
+
+                    if (displayedItems.isEmpty) {
+                      if (controller.isSearching.value) {
+                        return Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.search_off,
+                                  size: 64, color: Colors.grey[400]),
+                              const SizedBox(height: 16),
+                              Text(
+                                "No matching products found",
+                                style: TextStyle(
+                                  color: Colors.grey[600],
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }
+
                       return Center(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -119,58 +108,57 @@ class ProductPage extends StatelessWidget {
 
                     return ListView.builder(
                       padding: const EdgeInsets.only(bottom: 100),
-                      itemCount: productController.products.length,
+                      itemCount: displayedItems.length,
                       itemBuilder: (context, index) {
-                        final product = productController.products[index];
+                        final product = displayedItems[index];
                         return Padding(
                           padding: const EdgeInsets.symmetric(vertical: 8.0),
                           child: Slidable(
-                              key: ValueKey(product.productId),
-                              endActionPane: ActionPane(
-                                motion: const DrawerMotion(),
-                                extentRatio: 0.25,
-                                children: [
-                                  CustomSlidableAction(
-                                    padding: EdgeInsets.zero,
-                                    onPressed: (context) {
-                                      productController
-                                          .deleteProduct(product.productId);
-                                    },
-                                    backgroundColor: Colors.transparent,
-                                    foregroundColor: Colors.red,
-                                    child: Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        const Icon(
-                                          Icons.delete_outline,
-                                          color: Colors.red,
-                                          size: 24,
+                            key: ValueKey(product.productId),
+                            endActionPane: ActionPane(
+                              motion: const DrawerMotion(),
+                              extentRatio: 0.25,
+                              children: [
+                                CustomSlidableAction(
+                                  padding: EdgeInsets.zero,
+                                  onPressed: (context) {
+                                    controller.deleteProduct(product.productId);
+                                  },
+                                  backgroundColor: Colors.transparent,
+                                  foregroundColor: Colors.red,
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      const Icon(
+                                        Icons.delete_outline,
+                                        color: Colors.red,
+                                        size: 24,
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        'Delete',
+                                        style: TextStyle(
+                                          color: Colors.red.shade400,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w500,
                                         ),
-                                        const SizedBox(height: 4),
-                                        Text(
-                                          'Delete',
-                                          style: TextStyle(
-                                            color: Colors.red.shade400,
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
+                                      ),
+                                    ],
                                   ),
-                                ],
-                              ),
-                              child: ProductCard(
-                                productName: product.productName,
-                                category: product.category.categoryName,
-                                unit: product.unit.unitName,
-                                quantity: product.quantity,
-                                price: product.price.toDouble(),
-                                salePrice: product.salePrice.toDouble(),
-                                onPressed: () =>
-                                    openDialog(context, product.productId),
-                              )),
+                                ),
+                              ],
+                            ),
+                            child: ProductCard(
+                              productName: product.productName,
+                              category: product.category.categoryName,
+                              unit: product.unit.unitName,
+                              quantity: product.quantity,
+                              price: product.price.toDouble(),
+                              salePrice: product.salePrice.toDouble(),
+                              onPressed: () =>
+                                  openDialog(context, product.productId),
+                            ),
+                          ),
                         );
                       },
                     );

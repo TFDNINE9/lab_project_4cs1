@@ -163,7 +163,7 @@ class ProductEditDialog extends StatelessWidget {
                                         ? null
                                         : controller.selectedUnitId.value,
                                     hint: const Text('Select unit'),
-                                    items: unitList.units
+                                    items: unitList.items
                                         .map((unit) => DropdownMenuItem(
                                               value: unit.unitId,
                                               child: Text(unit.unitName),
@@ -238,7 +238,7 @@ class ProductEditDialog extends StatelessWidget {
                                   ? null
                                   : controller.selectedCategoryId.value,
                               hint: const Text('Select Category'),
-                              items: categoryList.categories
+                              items: categoryList.items
                                   .map((category) => DropdownMenuItem(
                                         value: category.categoryId,
                                         child: Text(category.categoryName),

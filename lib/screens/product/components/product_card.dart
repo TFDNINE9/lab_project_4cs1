@@ -2,6 +2,21 @@
 
 import 'package:flutter/material.dart';
 
+extension NumberFormat on num {
+  String get formatPrice {
+    int value = toInt();
+    String numStr = value.toString();
+    String result = '';
+    for (int i = 0; i < numStr.length; i++) {
+      if (i > 0 && (numStr.length - i) % 3 == 0) {
+        result += ',';
+      }
+      result += numStr[i];
+    }
+    return result;
+  }
+}
+
 class ProductCard extends StatelessWidget {
   final String productName;
   final String category;
@@ -121,7 +136,7 @@ class ProductCard extends StatelessWidget {
                           '$quantity $unit',
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
-                            fontSize: 16,
+                            fontSize: 12,
                           ),
                         ),
                       ],
@@ -137,10 +152,10 @@ class ProductCard extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          '\$$price',
+                          '${price.formatPrice} kip',
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
-                            fontSize: 16,
+                            fontSize: 12,
                           ),
                         ),
                       ],
@@ -156,11 +171,11 @@ class ProductCard extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          '\$$salePrice',
+                          '${salePrice.formatPrice} kip',
                           style: const TextStyle(
                             color: Colors.green,
                             fontWeight: FontWeight.bold,
-                            fontSize: 16,
+                            fontSize: 12,
                           ),
                         ),
                       ],

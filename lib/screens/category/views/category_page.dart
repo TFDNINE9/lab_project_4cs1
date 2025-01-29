@@ -1,8 +1,11 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:get/get.dart';
 import 'package:lab_project_4cs1/components/custom_card.dart';
 import 'package:lab_project_4cs1/components/custom_scaffold.dart';
+import 'package:lab_project_4cs1/components/searchbar/custom_search_field.dart';
 import 'package:lab_project_4cs1/screens/category/controller/category_list_controller.dart';
 import 'package:lab_project_4cs1/screens/category/views/category_edit_dialog.dart';
 
@@ -14,14 +17,10 @@ class CategoryPage extends StatelessWidget {
   Widget build(BuildContext context) {
     Future<void> openDialog(BuildContext context, int catId) => showDialog(
           context: context,
-          builder: (context) {
-            return CategoryEditDialog(
-              catId: catId,
-            );
-          },
+          builder: (context) => CategoryEditDialog(catId: catId),
         );
 
-    final catcontroller = Get.put(CategoryListController());
+    final controller = Get.put(CategoryListController());
 
     return CustomScaffold(
       title: "Category Management",
@@ -31,7 +30,6 @@ class CategoryPage extends StatelessWidget {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            // ignore: deprecated_member_use
             colors: [Colors.blue.withOpacity(0.1), Colors.white],
           ),
         ),
@@ -39,53 +37,16 @@ class CategoryPage extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Column(
             children: [
-              Container(
-                margin: const EdgeInsets.symmetric(vertical: 20),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(15),
-                  boxShadow: [
-                    BoxShadow(
-                      // ignore: deprecated_member_use
-                      color: Colors.grey.withOpacity(0.2),
-                      spreadRadius: 2,
-                      blurRadius: 5,
-                      offset: const Offset(0, 3),
-                    ),
-                  ],
-                ),
-                child: TextFormField(
-                  decoration: InputDecoration(
-                    prefixIcon: const Icon(Icons.search, color: Colors.blue),
-                    suffixIcon: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.mic, color: Colors.blue),
-                          onPressed: () {},
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.clear, color: Colors.grey),
-                          onPressed: () {},
-                        ),
-                      ],
-                    ),
-                    hintText: "Search categories...",
-                    hintStyle: TextStyle(color: Colors.grey[400]),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(15),
-                      borderSide: BorderSide.none,
-                    ),
-                    filled: true,
-                    fillColor: Colors.white,
-                  ),
-                ),
+              CustomSearchField(
+                controller: controller.searchController,
+                hintText: "Search categories...",
+                onClear: controller.clearSearch,
               ),
               Expanded(
                 child: RefreshIndicator(
-                  onRefresh: () async => catcontroller.fetchCat(),
+                  onRefresh: () => controller.fetchCat(),
                   child: Obx(() {
-                    if (catcontroller.isLoading.value) {
+                    if (controller.isLoading.value) {
                       return const Center(
                         child: CircularProgressIndicator(
                           color: Colors.blue,
@@ -93,7 +54,30 @@ class CategoryPage extends StatelessWidget {
                       );
                     }
 
-                    if (catcontroller.categories.isEmpty) {
+                    final displayedItems = controller.filteredItems;
+
+                    if (displayedItems.isEmpty) {
+                      if (controller.isSearching.value) {
+                        return Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.search_off,
+                                  size: 64, color: Colors.grey[400]),
+                              const SizedBox(height: 16),
+                              Text(
+                                "No matching categories found",
+                                style: TextStyle(
+                                  color: Colors.grey[600],
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }
+
                       return Center(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -124,9 +108,9 @@ class CategoryPage extends StatelessWidget {
 
                     return ListView.builder(
                       padding: const EdgeInsets.only(bottom: 100),
-                      itemCount: catcontroller.categories.length,
+                      itemCount: displayedItems.length,
                       itemBuilder: (context, index) {
-                        final category = catcontroller.categories[index];
+                        final category = displayedItems[index];
                         return Padding(
                           padding: const EdgeInsets.symmetric(vertical: 8.0),
                           child: Slidable(
@@ -138,8 +122,7 @@ class CategoryPage extends StatelessWidget {
                                 CustomSlidableAction(
                                   padding: EdgeInsets.zero,
                                   onPressed: (context) {
-                                    catcontroller
-                                        .deleteCat(category.categoryId);
+                                    controller.deleteCat(category.categoryId);
                                   },
                                   backgroundColor: Colors.transparent,
                                   foregroundColor: Colors.red,

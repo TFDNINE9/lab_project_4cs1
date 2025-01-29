@@ -5,6 +5,7 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:get/get.dart';
 import 'package:lab_project_4cs1/components/custom_card.dart';
 import 'package:lab_project_4cs1/components/custom_scaffold.dart';
+import 'package:lab_project_4cs1/components/searchbar/custom_search_field.dart';
 import 'package:lab_project_4cs1/screens/unit/controller/unit_list_controller.dart';
 import 'package:lab_project_4cs1/screens/unit/views/unit_edit_dialog.dart';
 
@@ -19,7 +20,7 @@ class UnitPage extends StatelessWidget {
           builder: (context) => UnitEditDialog(unitId: unitId),
         );
 
-    final unitController = Get.put(UnitListController());
+    final controller = Get.put(UnitListController());
 
     return CustomScaffold(
       title: "Unit Management",
@@ -36,52 +37,16 @@ class UnitPage extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Column(
             children: [
-              Container(
-                margin: const EdgeInsets.symmetric(vertical: 20),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(15),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.2),
-                      spreadRadius: 2,
-                      blurRadius: 5,
-                      offset: const Offset(0, 3),
-                    ),
-                  ],
-                ),
-                child: TextFormField(
-                  decoration: InputDecoration(
-                    prefixIcon: const Icon(Icons.search, color: Colors.blue),
-                    suffixIcon: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.mic, color: Colors.blue),
-                          onPressed: () {},
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.clear, color: Colors.grey),
-                          onPressed: () {},
-                        ),
-                      ],
-                    ),
-                    hintText: "Search units...",
-                    hintStyle: TextStyle(color: Colors.grey[400]),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(15),
-                      borderSide: BorderSide.none,
-                    ),
-                    filled: true,
-                    fillColor: Colors.white,
-                  ),
-                ),
+              CustomSearchField(
+                controller: controller.searchController,
+                hintText: "Search units...",
+                onClear: controller.clearSearch,
               ),
               Expanded(
                 child: RefreshIndicator(
-                  onRefresh: () => unitController.fetchUnits(),
+                  onRefresh: () => controller.fetchUnits(),
                   child: Obx(() {
-                    if (unitController.isLoading.value) {
+                    if (controller.isLoading.value) {
                       return const Center(
                         child: CircularProgressIndicator(
                           color: Colors.blue,
@@ -89,7 +54,30 @@ class UnitPage extends StatelessWidget {
                       );
                     }
 
-                    if (unitController.units.isEmpty) {
+                    final displayedItems = controller.filteredItems;
+
+                    if (displayedItems.isEmpty) {
+                      if (controller.isSearching.value) {
+                        return Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.search_off,
+                                  size: 64, color: Colors.grey[400]),
+                              const SizedBox(height: 16),
+                              Text(
+                                "No matching units found",
+                                style: TextStyle(
+                                  color: Colors.grey[600],
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }
+
                       return Center(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -120,9 +108,9 @@ class UnitPage extends StatelessWidget {
 
                     return ListView.builder(
                       padding: const EdgeInsets.only(bottom: 100),
-                      itemCount: unitController.units.length,
+                      itemCount: displayedItems.length,
                       itemBuilder: (context, index) {
-                        final unit = unitController.units[index];
+                        final unit = displayedItems[index];
                         return Padding(
                           padding: const EdgeInsets.symmetric(vertical: 8.0),
                           child: Slidable(
@@ -134,7 +122,7 @@ class UnitPage extends StatelessWidget {
                                 CustomSlidableAction(
                                   padding: EdgeInsets.zero,
                                   onPressed: (context) {
-                                    unitController.deleteUnit(unit.unitId);
+                                    controller.deleteUnit(unit.unitId);
                                   },
                                   backgroundColor: Colors.transparent,
                                   foregroundColor: Colors.red,
